@@ -1,0 +1,32 @@
+﻿<Window x:Class="BelovTextHandlerApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BelovTextHandlerApp"
+        mc:Ignorable="d"
+        Title="Обработчик текста" Height="450" Width="800">
+    <Grid>
+        <Button Name="ChooseFromFileButton" Command="{Binding AddFromFilesCommand}"
+                Content="Выбрать файл(ы) из которых достать&#xA;" HorizontalAlignment="Left" Margin="27,87,0,0" VerticalAlignment="Top" Width="250" Height="30"/>
+        <Button Name="ChooseToFileButton" Command="{Binding AddToFilesCommand}"
+                Content="Выбрать файл(ы) в которые положить&#xD;&#xA;" HorizontalAlignment="Left" Margin="321,87,0,0" VerticalAlignment="Top" Width="250" Height="30"/>
+
+        <Button Name="SaveFileButton" Command="{Binding ProcessFilesCommand}"
+                Content="Сохранить файл(ы)&#xA;" HorizontalAlignment="Left" Margin="450,384,0,0" VerticalAlignment="Top" Width="121" Height="25" Background="#FF46FF00"/>
+
+        <Label Name="ChosenFilesAmountLabel" Content="{Binding SelectedFilesCount}"
+               HorizontalAlignment="Left" Margin="27,54,0,0" VerticalAlignment="Top" Width="257" Height="24" RenderTransformOrigin="-0.93,-2.083"/>
+        <ListBox Name="ChosenFilesListBox" ItemsSource="{Binding SelectedFromFiles}"
+                 HorizontalAlignment="Left" Height="253" Margin="27,120,0,0" VerticalAlignment="Top" Width="250"/>
+        <ListBox x:Name="ChosenFilesListBox_Copy" ItemsSource="{Binding SelectedToFiles}"
+            HorizontalAlignment="Left" Height="253" Margin="321,120,0,0" VerticalAlignment="Top" Width="250"/>
+
+        <CheckBox Name="DeletionLongerCheckBox" IsChecked="{Binding RemovePunctuation}"
+                  Content="Удалить знаки препинания" HorizontalAlignment="Left" Margin="384,29,0,0" VerticalAlignment="Top" Height="20" Width="187"/>
+        <TextBox Name="WordsLongerThanTextBox" Text="{Binding MinWordLength, Mode=TwoWay}"
+                 HorizontalAlignment="Left" Height="23" Margin="219,26,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="158"/>
+        <CheckBox Name="DeletionPunctuationCheckBox" IsChecked="{Binding RemoveLongerThan}"
+                  Content="Удалить слова длиной менее:" HorizontalAlignment="Left" Margin="27,29,0,0" VerticalAlignment="Top" Height="20" Width="187"/>
+    </Grid>
+</Window>
