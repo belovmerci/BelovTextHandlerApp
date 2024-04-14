@@ -101,10 +101,11 @@ namespace BelovTextHandlerApp
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void ProcessFiles()
+        private async void ProcessFiles()
         {
             TextHandler textHandler = new TextHandler();
-            textHandler.ProcessFile(InputFilePath, OutputFilePath, MinWordLength, RemovePunctuation);
+            await textHandler.ProcessFileListAsync(SelectedFromFiles, SelectedToFiles, MinWordLength, RemovePunctuation);
+            // await textHandler.ProcessFilesConcurrentlyAsync(SelectedFromFiles, SelectedToFiles, MinWordLength, RemovePunctuation);
         }
 
 

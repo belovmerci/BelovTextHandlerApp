@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace BelovTextHandlerApp
 {
     public class TextHandler
     {
-        public void ProcessFile(string inputFilePath, string outputFilePath, int minWordLength, bool removePunctuation)
+        public async Task ProcessFileAsync(string inputFilePath, string outputFilePath, int minWordLength, bool removePunctuation)
         {
             try
             {
-                // Чтение текста из входного файла
-                string text = File.ReadAllText(inputFilePath);
+                string text = await ReadTextFromFileAsync(inputFilePath);
 
-                // Обработка текста
                 if (removePunctuation)
                 {
                     text = RemovePunctuation(text);
@@ -26,8 +26,7 @@ namespace BelovTextHandlerApp
                     text = RemoveShortWords(text, minWordLength);
                 }
 
-                // Запись обработанного текста в выходной файл
-                File.WriteAllText(outputFilePath, text);
+                await WriteTextToFileAsync(outputFilePath, text);
 
                 Trace.WriteLine("Файл успешно обработан.");
             }
@@ -37,17 +36,48 @@ namespace BelovTextHandlerApp
             }
         }
 
-        public void ProcessFileList(List<string> inputFilePaths, List<string> outputFilePaths, int minWordLength, bool removePunctuation)
+        public async Task ProcessFileListAsync(
+            List<string> inputFilePaths, List<string> outputFilePaths,
+            int minWordLength, bool removePunctuation)
         {
             for (int i = 0; (i < inputFilePaths.Count) && (i < outputFilePaths.Count); i++)
             {
-                ProcessFile(inputFilePaths[i], outputFilePaths[i], minWordLength, removePunctuation);
+                await ProcessFileAsync(inputFilePaths[i], outputFilePaths[i], minWordLength, removePunctuation);
+            }
+        }
+
+        // Make all files process concurrently, mwahaha
+        // RIP CPU (or not tbh)
+        public async Task ProcessFilesConcurrentlyAsync(List<string> inputFilePaths, List<string> outputFilePaths, int minWordLength, bool removePunctuation)
+        {
+            await Task.WhenAll(inputFilePaths.Select((inputFilePath, index) =>
+                ProcessFileAsync(inputFilePath, outputFilePaths[index], minWordLength, removePunctuation)));
+        }
+
+        private async Task<string> ReadTextFromFileAsync(string filePath)
+        {
+            using (StreamReader reader = new StreamReader(filePath))
+            {
+                return await reader.ReadToEndAsync();
+            }
+        }
+
+        private async Task WriteTextToFileAsync(string filePath, string text)
+        {
+            using (FileStream fileStream = 
+                new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
+            {
+                using (StreamWriter writer = new StreamWriter(fileStream))
+                {
+                    await writer.WriteAsync(text);
+                }
             }
         }
 
         private string RemovePunctuation(string text)
         {
-            // Удаление знаков препинания с использованием регулярного выражения
+            // Removing punctuation using
+            // regular expression - Regex
             return Regex.Replace(text, @"[\p{P}\p{S}]", "");
         }
 
