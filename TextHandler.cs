@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.ObjectModel;
 
 namespace BelovTextHandlerApp
 {
@@ -23,7 +24,8 @@ namespace BelovTextHandlerApp
 
                 if (minWordLength > 0)
                 {
-                    text = RemoveShortWords(text, minWordLength);
+                    // text = RemoveShortWords(text, minWordLength);
+                    text = RemoveShortWordsLineReader(text, minWordLength);
                 }
 
                 await WriteTextToFileAsync(outputFilePath, text);
@@ -37,7 +39,7 @@ namespace BelovTextHandlerApp
         }
 
         public async Task ProcessFileListAsync(
-            List<string> inputFilePaths, List<string> outputFilePaths,
+            ObservableCollection<string> inputFilePaths, ObservableCollection<string> outputFilePaths,
             int minWordLength, bool removePunctuation)
         {
             for (int i = 0; (i < inputFilePaths.Count) && (i < outputFilePaths.Count); i++)
@@ -48,7 +50,8 @@ namespace BelovTextHandlerApp
 
         // Make all files process concurrently, mwahaha
         // RIP CPU (or not tbh)
-        public async Task ProcessFilesConcurrentlyAsync(List<string> inputFilePaths, List<string> outputFilePaths, int minWordLength, bool removePunctuation)
+        public async Task ProcessFilesConcurrentlyAsync(ObservableCollection<string> inputFilePaths,
+            ObservableCollection<string> outputFilePaths, int minWordLength, bool removePunctuation)
         {
             await Task.WhenAll(inputFilePaths.Select((inputFilePath, index) =>
                 ProcessFileAsync(inputFilePath, outputFilePaths[index], minWordLength, removePunctuation)));
@@ -83,8 +86,9 @@ namespace BelovTextHandlerApp
 
         private string RemoveShortWords(string text, int minWordLength)
         {
-            string[] words = text.Split(new char[] { ' ', '\n', '\r', '\t' },
-                StringSplitOptions.RemoveEmptyEntries);
+            string[] words = text.Split(' ');
+            // string[] words = text.Split(new char[] { ' ', '\n', '\r', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            
             for (int i = 0; i < words.Length; i++)
             {
                 if (words[i].Length < minWordLength)
@@ -93,6 +97,42 @@ namespace BelovTextHandlerApp
                 }
             }
             return string.Join(" ", words);
+        }
+
+        private string RemoveShortWordsLineReader(string text, int minWordLength)
+        {
+            string[] lines = text.Split(new char[] {'\n', '\r', '\t' }, StringSplitOptions.None);
+            List<string[]> resultLines = new List<string[]>();
+            // for each line of text
+            foreach (string line in lines)
+            {
+                string[] words = line.Split(' ');
+
+                for (int i = 0; i < words.Length; i++)
+                {
+                    if (words[i].Length < minWordLength)
+                    {
+                        words[i] = string.Empty;
+                    }
+                }
+                resultLines.Add(words);
+            }
+
+            // putting them back together
+            string result = string.Empty;
+            foreach (string[] words in resultLines)
+            {
+                foreach(string word in words)
+                {
+                    if (word != string.Empty)
+                    {
+                        result += word;
+                        result += ' ';
+                    }
+                }
+                result += "\n";
+            }
+            return result;
         }
     }
 }

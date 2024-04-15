@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Microsoft.Win32;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace BelovTextHandlerApp
 {
@@ -18,8 +19,8 @@ namespace BelovTextHandlerApp
 
         private RelayCommand _processFilesCommand;
 
-        private List<string> _selectedFromFiles = new List<string>();
-        public List<string> SelectedFromFiles
+        private ObservableCollection<string> _selectedFromFiles = new ObservableCollection<string>();
+        public ObservableCollection<string> SelectedFromFiles
         {
             get { return _selectedFromFiles; }
             set
@@ -29,8 +30,8 @@ namespace BelovTextHandlerApp
             }
         }
 
-        private List<string> _selectedToFiles = new List<string>();
-        public List<string> SelectedToFiles
+        private ObservableCollection<string> _selectedToFiles = new ObservableCollection<string>();
+        public ObservableCollection<string> SelectedToFiles
         {
             get { return _selectedToFiles; }
             set
@@ -121,7 +122,11 @@ namespace BelovTextHandlerApp
 
             if (openFileDialog.ShowDialog() == true)
             {
-                SelectedFromFiles.AddRange(openFileDialog.FileNames);
+                // _selectedFromFiles.AddRange(openFileDialog.FileNames);
+                foreach (string file in openFileDialog.FileNames)
+                {
+                    SelectedFromFiles.Add(file);
+                }
                 RecountFilesNumber();
                 OnPropertyChanged(nameof(SelectedFromFiles));
             }
@@ -135,9 +140,13 @@ namespace BelovTextHandlerApp
 
             if (openFileDialog.ShowDialog() == true)
             {
-                SelectedToFiles.AddRange(openFileDialog.FileNames);
+                // _selectedToFiles.AddRange(openFileDialog.FileNames);
+                foreach (string file in openFileDialog.FileNames)
+                {
+                    SelectedToFiles.Add(file);
+                }
                 RecountFilesNumber();
-                OnPropertyChanged(nameof(SelectedToFiles));
+                OnPropertyChanged(nameof(_selectedToFiles));
             }
         }
 
